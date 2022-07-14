@@ -17,7 +17,7 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: levi106/backapi
+  IMAGE_NAME: levi106/backapi-java
 
 jobs:
   build-and-push-image:
