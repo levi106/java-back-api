@@ -1,0 +1,14 @@
+FROM gradle:jdk11 as builder
+
+WORKDIR /home/gradle/src
+RUN curl -OL https://github.com/microsoft/ApplicationInsights-Java/releases/download/3.3.0/applicationinsights-agent-3.3.0.jar
+COPY --chown=gradle:gradle . /home/gradle/src/
+RUN gradle build
+
+FROM adoptopenjdk/openjdk11:x86_64-ubuntu-jdk-11.0.11_9
+
+EXPOSE 8080
+WORKDIR /app
+COPY --from=builder /home/gradle/src/applicationinsights-agent-3.3.0.jar ./applicationinsights-agent-3.3.0.jar
+COPY --from=builder /home/gradle/src/build/libs/*.jar ./app.jar
+ENTRYPOINT ["java", "-Xmx128M", "-XX:+FlightRecorder", "-XX:+PrintFlagsFinal", "-javaagent:/app/applicationinsights-agent-3.3.0.jar", "-jar", "app.jar"]
