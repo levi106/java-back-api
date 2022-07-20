@@ -10,7 +10,7 @@ var vnetName = toLower('vnet-${baseName}')
 var laName = toLower('la-${baseName}')
 var aiName = toLower('ai-${baseName}')
 var aksName = toLower('aks-${baseName}')
-var aksVersion = ''
+var aksVersion = '1.22.11'
 var nodeCount = 3
 var nodeVmSize = 'Standard_D2s_v3'
 var apimName = toLower('apim-${baseName}')
@@ -243,6 +243,15 @@ resource aks 'Microsoft.ContainerService/managedClusters@2020-09-01' = {
         enabled: true
       }
     }
+  }
+}
+
+resource roleAssignment 'Microsoft.Authorization/roleAssignments@2020-04-01-preview' = {
+  name: guid(nodesSubnet.id, 'Network Contributor')
+  scope: nodesSubnet
+  properties: {
+    principalId: aks.identity.principalId
+    roleDefinitionId: resourceId('Microsoft.Authorization/roleDefinitions', '4d97b98b-1d4f-4787-a291-c67834d212e7')
   }
 }
 
