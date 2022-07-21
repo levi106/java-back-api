@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    app: backapi
+  name: backapi
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: backapi
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: backapi
+    spec:
+      containers:
+      - image: ghcr.io/levi106/backapi-java:main
+        name: backapi-java
+        ports:
+        - containerPort: 8080
+        env:
+        - name: APPLICATIONINSIGHTS_CONNECTION_STRING
+          valueFrom:
+            secretKeyRef:
+              name: ai
+              key: connectionstring
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "500m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: backapi
+  name: backapi
+  annotations:
+    service.beta.kubernetes.io/azure-load-balancer-internal: "true"
+spec:
+  ports:
+  - port: 80
+    protocol: TCP
+    targetPort: 8080
+  selector:
+    app: backapi
+  type: LoadBalancer
+  loadBalancerIP: 192.168.4.253
