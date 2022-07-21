@@ -385,6 +385,60 @@ resource apimLogger 'Microsoft.ApiManagement/service/loggers@2021-12-01-preview'
   }
 }
 
+resource apimDiag 'Microsoft.ApiManagement/service/diagnostics@2021-12-01-preview' = {
+  name: 'applicationinsights'
+  parent: apim
+  properties: {
+    alwaysLog: 'allErrors'
+    httpCorrelationProtocol: 'W3C'
+    verbosity: 'information'
+    logClientIp: true
+    loggerId: apimLogger.id
+    sampling: {
+      samplingType: 'fixed'
+      percentage: 100
+    }
+  }
+}
+
+resource api1 'Microsoft.ApiManagement/service/apis@2021-12-01-preview' = {
+  name: 'api1'
+  parent: apim
+  properties: {
+    displayName: 'api1'
+    serviceUrl: 'http://192.168.4.253'
+    path: 'api'
+    apiRevision: '1'
+    subscriptionRequired: false
+    protocols: [
+      'HTTP'
+      'HTTPS'
+    ]
+    isCurrent: true
+  }
+}
+
+resource reactor 'Microsoft.ApiManagement/service/apis/operations@2021-12-01-preview' = {
+  name: 'reactor'
+  parent: api1
+  properties: {
+    displayName: 'reactor'
+    method:  'GET'
+    urlTemplate: '/reactor/{value}'
+    templateParameters: [
+      {
+        name: 'value'
+        type: 'Number'
+        defaultValue: '42'
+        required: false
+        values: [
+          '42'
+        ]
+      }
+    ]
+  }
+}
+
 resource vmPip 'Microsoft.Network/publicIPAddresses@2020-11-01' = {
   name: 'pip-${vmName}'
   location: location
